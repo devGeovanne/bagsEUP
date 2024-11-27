@@ -4,12 +4,6 @@ import useImage from "./hooks/useImage";
 import { saveAs } from "file-saver";
 
 const App = () => {
-  const defaultStyle = {
-    color: "red",
-    fontSize: 20,
-    fontFamily: "Montserrat",
-  };
-
   const [measures, setMeasures] = useState(() => {
     const savedMeasures = localStorage.getItem("measures");
     return savedMeasures
@@ -27,6 +21,12 @@ const App = () => {
   const [fileName, setFileName] = useState(() => {
     return localStorage.getItem("fileName") || "bolsa-customizada";
   });
+  const [textStyle, setTextStyle] = useState(() => {
+    const savedStyle = localStorage.getItem("textStyle");
+    return savedStyle
+      ? JSON.parse(savedStyle)
+      : { color: "red", fontSize: 20, fontFamily: "Montserrat" };
+  });
   const stageRef = useRef();
   const [image] = useImage(process.env.PUBLIC_URL + "/IMG1.jpg");
 
@@ -37,6 +37,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("fileName", fileName);
   }, [fileName]);
+
+  useEffect(() => {
+    localStorage.setItem("textStyle", JSON.stringify(textStyle));
+  }, [textStyle]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -55,12 +59,16 @@ const App = () => {
     setUploadedImageSrc(null);
   };
 
-  const handleInputChange = (id, key, value) => {
+  const handleMeasureChange = (id, key, value) => {
     setMeasures((prev) =>
       prev.map((measure) =>
         measure.id === id ? { ...measure, [key]: value } : measure
       )
     );
+  };
+
+  const handleTextStyleChange = (key, value) => {
+    setTextStyle((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleDragMove = (e, id) => {
@@ -145,9 +153,9 @@ const App = () => {
               Cor:
               <input
                 type="color"
-                value={defaultStyle.color}
+                value={textStyle.color}
                 onChange={(e) =>
-                  handleInputChange("color", e.target.value)
+                  handleTextStyleChange("color", e.target.value)
                 }
                 style={styles.input}
               />
@@ -156,9 +164,9 @@ const App = () => {
               Tamanho:
               <input
                 type="number"
-                value={defaultStyle.fontSize}
+                value={textStyle.fontSize}
                 onChange={(e) =>
-                  handleInputChange("fontSize", e.target.value)
+                  handleTextStyleChange("fontSize", parseInt(e.target.value))
                 }
                 style={styles.input}
               />
@@ -166,9 +174,9 @@ const App = () => {
             <label style={styles.label}>
               Fonte:
               <select
-                value={defaultStyle.fontFamily}
+                value={textStyle.fontFamily}
                 onChange={(e) =>
-                  handleInputChange("fontFamily", e.target.value)
+                  handleTextStyleChange("fontFamily", e.target.value)
                 }
                 style={styles.select}
               >
@@ -207,9 +215,9 @@ const App = () => {
                 text={measure.text}
                 x={measure.x}
                 y={measure.y}
-                fill={measure.color}
-                fontSize={measure.fontSize}
-                fontFamily={measure.fontFamily}
+                fill={textStyle.color}
+                fontSize={textStyle.fontSize}
+                fontFamily={textStyle.fontFamily}
                 draggable
                 onDragMove={(e) => handleDragMove(e, measure.id)}
               />
@@ -229,7 +237,7 @@ const App = () => {
                   type="text"
                   value={measure.text}
                   onChange={(e) =>
-                    handleInputChange(measure.id, "text", e.target.value)
+                    handleMeasureChange(measure.id, "text", e.target.value)
                   }
                   style={styles.input}
                 />
