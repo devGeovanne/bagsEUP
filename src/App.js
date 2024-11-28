@@ -15,6 +15,7 @@ const App = () => {
         ];
   });
 
+  const [dimensionInput, setDimensionInput] = useState(""); // Novo estado para o campo único
   const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [alignment, setAlignment] = useState("center");
@@ -105,8 +106,27 @@ const App = () => {
 
   const downloadImage = () => {
     const uri = stageRef.current.toDataURL();
-    const formattedFileName = fileName.replace(/\s+/g, '-').toLowerCase();
+    const formattedFileName = fileName.replace(/\s+/g, "-").toLowerCase();
     saveAs(uri, `${formattedFileName}.jpg`);
+  };
+
+  // Novo manipulador para o campo único de dimensões
+  const handleDimensionInput = (value) => {
+    setDimensionInput(value);
+
+    // Preservar o formato original (não forçar para maiúsculas)
+    const dimensions = value.match(/\d+\s*cm/gi); // Encontra valores no formato "número + cm"
+    if (dimensions && dimensions.length === 3) {
+      const [width, height, depth] = dimensions;
+      setMeasures((prev) =>
+        prev.map((measure) => {
+          if (measure.id === "width") return { ...measure, text: width };
+          if (measure.id === "height") return { ...measure, text: height };
+          if (measure.id === "depth") return { ...measure, text: depth };
+          return measure;
+        })
+      );
+    }
   };
 
   return (
@@ -126,6 +146,13 @@ const App = () => {
             type="text"
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
+            style={styles.input}
+          />
+          <label style={styles.label}>Dimensões (Ex.: 21cm x 15cm x 31cm):</label>
+          <input
+            type="text"
+            value={dimensionInput}
+            onChange={(e) => handleDimensionInput(e.target.value)}
             style={styles.input}
           />
           <label style={styles.label}>Alinhamento:</label>
@@ -154,9 +181,7 @@ const App = () => {
               <input
                 type="color"
                 value={textStyle.color}
-                onChange={(e) =>
-                  handleTextStyleChange("color", e.target.value)
-                }
+                onChange={(e) => handleTextStyleChange("color", e.target.value)}
                 style={styles.input}
               />
             </label>
