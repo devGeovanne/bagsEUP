@@ -114,15 +114,15 @@ const App = () => {
   const handleDimensionInput = (value) => {
     setDimensionInput(value);
 
-    // Preservar o formato original (não forçar para maiúsculas)
-    const dimensions = value.match(/\d+\s*cm/gi); // Encontra valores no formato "número + cm"
-    if (dimensions && dimensions.length === 3) {
+    // Regex para capturar números e "x"
+    const dimensions = value.split("x").map((dim) => dim.trim());
+    if (dimensions.length === 3) {
       const [width, height, depth] = dimensions;
       setMeasures((prev) =>
         prev.map((measure) => {
-          if (measure.id === "width") return { ...measure, text: width };
-          if (measure.id === "height") return { ...measure, text: height };
-          if (measure.id === "depth") return { ...measure, text: depth };
+          if (measure.id === "width") return { ...measure, text: `${width}cm` };
+          if (measure.id === "height") return { ...measure, text: `${height}cm` };
+          if (measure.id === "depth") return { ...measure, text: `${depth}cm` };
           return measure;
         })
       );
@@ -148,7 +148,7 @@ const App = () => {
             onChange={(e) => setFileName(e.target.value)}
             style={styles.input}
           />
-          <label style={styles.label}>Dimensões (Ex.: 21cm x 15cm x 31cm):</label>
+          <label style={styles.label}>Dimensões (Ex.: 21.5 x 7.5 x 15):</label>
           <input
             type="text"
             value={dimensionInput}
